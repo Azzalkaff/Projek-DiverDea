@@ -20,12 +20,12 @@ export const SynthesisEngine = {
             'Game 2D': {
                 role: 'Principal Game Architect & Creative Technologist',
                 directives: [
-                    'ASSETS: Buat bentuk objek menggunakan SVG persis dengan bentuk assets objek yang akan dibuat
+                    'ASSETS: Buat bentuk objek menggunakan SVG persis dengan bentuk assets objek yang akan dibuat',
                     'PHASER ARCHITECTURE: Pisahkan logika ke 3 Class Scene (BootScene, PlayScene, GameOverScene). Gunakan Phaser.Physics.Arcade. WAJIB pakai primitif (Phaser.Graphics), DILARANG meload gambar/Base64. Gunakan Phaser.Scale.FIT.',
                     'INPUT & COLLISION: Wajib gunakan `createCursorKeys()` untuk polling input di `update()` (bukan addEventListener). Gunakan `this.physics.add.collider()` untuk tabrakan, jangan tulis rumus fisika manual.',
-                    'ENVIRONMENT DEPTH: Jangan biarkan background kosong/hitam mati. Buat elemen dinamis yang estetik dan sesuai dengan konsep aplikasi,
+                    'ENVIRONMENT DEPTH: Jangan biarkan background kosong/hitam mati. Buat elemen dinamis yang estetik dan sesuai dengan konsep aplikasi',
                     'PROGRESSION & DIFFICULTY: Terapkan kurva kesulitan dinamis (kecepatan/spawn rate musuh naik seiring waktu). Simpan "High Score" ke LocalStorage secara real-time agar persaingan terasa nyata.',
-                    'DOPAMINE LOOP (HOOK): Jangan hanya cetak skor. Implementasikan sistem "Combo Multiplier" jika pemain bermain agresif tanpa gagal, dan jatuhkan "Power-Ups" secara acak (misal: perisai, tembakan ganda, pelambat waktu).'
+                    'DOPAMINE LOOP (HOOK): Jangan hanya cetak skor. Implementasikan sistem "Combo Multiplier" jika pemain bermain agresif tanpa gagal, dan jatuhkan "Power-Ups" secara acak (misal: perisai, tembakan ganda, pelambat waktu).',
                     'DESKTOP-FIRST CONTROLS: EKSKLUSIF untuk Desktop. Gunakan Keyboard (WASD/Arrows/Space) dan Mouse (Pointer/Klik). DILARANG menulis kontrol sentuh (mobile UI).',
                     'PROCEDURAL AUDIO: Gunakan sintesis Web Audio API (OscillatorNode) untuk membuat efek suara yang ada digame, JANGAN meload file audio eksternal.'
                 ]
