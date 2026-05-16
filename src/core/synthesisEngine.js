@@ -265,15 +265,149 @@ PENTING: Karena batasan token, PRIORITASKAN penulisan KODE LENGKAP di atas segal
 4. **Roadmap & Testing:** Poin-poin singkat (bullet points) untuk fase pengembangan berikutnya dan strategi testing mekanik inti.`;
     },
 
-    generateMasterPrompt(source, colors) {
+    generateMasterPrompt(source, libStacks, categoryFocusMap, colors) {
         const mechanicsList = (source.mechanics || []).map(m => `  - ${m}`).join('\n');
         const stylesList = (source.styles || []).length ? `- **Styles/Themes**:\n${source.styles.map(s => `  - ${s}`).join('\n')}` : '';
         const audiencesList = (source.audiences || []).length ? `- **Target Audiences**:\n${source.audiences.map(a => `  - ${a}`).join('\n')}` : '';
         const constraintsList = (source.constraints || []).length ? `- **Design Constraints**:\n${source.constraints.map(c => `  - ${c}`).join('\n')}` : '';
 
+        // Category configs khusus untuk Full-Stack Build (Bukan sekedar Prototype HTML)
+        const masterCategoryConfigs = {
+            'Productivity': {
+                role: 'Principal Workflow & Systems Architect',
+                directives: [
+                    'SYSTEM ARCHITECTURE: Implement centralized state management for task lifecycles using Zustand/Pinia. Use a Command Pattern for primary user actions.',
+                    'KEYBOARD-FIRST UX: Mandatory global hotkeys. Implement focus-trap for modals and highly accessible tab navigation.',
+                    'PERFORMANCE: Use Virtual Scrolling for large lists (e.g., tanstack-virtual). Implement optimistic UI updates for database interactions.'
+                ]
+            },
+            'Game 2D': {
+                role: 'Principal Game Architect & Creative Technologist',
+                directives: [
+                    'PHASER ARCHITECTURE: Set up a robust Vite + React/Vue + Phaser 3 integration. Structure game logic into clean Class Scenes (Boot, Preload, Play, UI).',
+                    'STATE INTEGRATION: Synchronize Game State (Phaser) with UI State (React/Vue) using an Event Emitter or shared store context.',
+                    'PERFORMANCE: Use Phaser Object Pooling for projectiles/enemies to avoid memory leaks and garbage collection spikes.'
+                ]
+            },
+            'Social': {
+                role: 'Principal Social Architecture & Growth Engineer',
+                directives: [
+                    'INTERACTION ARCHITECTURE: Implement an Event-Driven system for Likes/Follows. Ensure optimistic UI updates to mask network latency.',
+                    'CONTENT FEED: Design a high-performance infinite scroll with robust data fetching strategies (React Query/SWR).',
+                    'REAL-TIME: Prepare the architecture for WebSocket/Supabase Realtime integration for notifications or chat.'
+                ]
+            },
+            'Fintech': {
+                role: 'Principal Fintech Security & Data Architect',
+                directives: [
+                    'DATA PRECISION: Strictly use Dinero.js or Big.js for monetary calculations. No floating-point math for currency.',
+                    'SECURITY UX: Implement secure local states, handle JWT best practices conceptually, and design biometric/PIN simulation UI flows.',
+                    'TRANSACTION FLOW: Build robust multi-step Wizard forms using React Hook Form + Zod for strict payload validation.'
+                ]
+            },
+            'Health': {
+                role: 'Principal Health-Tech & Calm UI Specialist',
+                directives: [
+                    'DATA PRIVACY: Architect secure patient-data handling logic. Implement "Private Vault" view modes.',
+                    'ACCESSIBILITY: Strict WCAG 2.1 AA compliance. Use semantic HTML and ensure health metrics are screen-reader optimized.',
+                    'HABIT ARCHITECTURE: Focus on local-first streak tracking (LocalStorage/IndexedDB) that can sync with a backend.'
+                ]
+            },
+            'Education': {
+                role: 'Principal Learning Architect & EdTech Engineer',
+                directives: [
+                    'KNOWLEDGE ARCHITECTURE: Implement Spaced Repetition (SRS) algorithms logic and learning progress persistence.',
+                    'STATE MANAGEMENT: Handle complex, deeply nested state for courses, modules, and quiz progress safely.',
+                    'GAMIFICATION: Build XP calculation and leveling logic tied securely to user interaction states.'
+                ]
+            },
+            'E-commerce': {
+                role: 'Principal Conversion & E-commerce Architect',
+                directives: [
+                    'CONVERSION FUNNEL: Optimize Cart state management. Ensure the cart persists reliably across sessions.',
+                    'PERFORMANCE: Optimize images (Next/Image) and ensure components are structured to support Server-Side Rendering (SSR) for SEO.',
+                    'STATE: Handle complex product variant selections (Size/Color matrix) seamlessly without UI lag.'
+                ]
+            },
+            'Utility': {
+                role: 'Principal Systems & Tooling Engineer',
+                directives: [
+                    'EXECUTION SPEED: Integrate Web Workers for heavy data processing to keep the UI thread completely unblocked.',
+                    'PERSISTENCE: Use IndexedDB wrappers (like localForage) for handling large files or heavy caching locally.',
+                    'ERROR HANDLING: Implement robust Global Error Boundaries and comprehensive fallback UI states.'
+                ]
+            },
+            'Services': {
+                role: 'Principal Service-Flow & Logistics Architect',
+                directives: [
+                    'BOOKING ARCHITECTURE: Implement complex date/time manipulation logic cleanly using date-fns or dayjs.',
+                    'SPATIAL DATA: Structure components ready for Leaflet/Google Maps integration with geospatial data handling.',
+                    'STATE TIMELINE: Use a strict state machine approach for handling service progression statuses (Pending -> Active -> Done).'
+                ]
+            },
+            'Creative': {
+                role: 'Principal Creative Tools & Graphics Architect',
+                directives: [
+                    'CANVAS ARCHITECTURE: Build robust state management for Canvas Undo/Redo stacks (History API logic).',
+                    'PERFORMANCE: Optimize React/Vue component re-renders strictly to prevent frame drops when interacting with Canvas/WebGL contexts.',
+                    'EXPORT ENGINE: Implement Blob manipulation and stream handling for saving/exporting user creations.'
+                ]
+            },
+            'Game 3D': {
+                role: 'Principal 3D Game Architect & WebGL Engineer',
+                directives: [
+                    '3D ENGINE: Integrate Babylon.js or React Three Fiber (R3F) cleanly within the modern UI framework.',
+                    'PHYSICS: Set up Havok/Cannon.js physics integration, ideally isolating physics calculations in a Web Worker.',
+                    'ASSET MANAGEMENT: Implement smart preloading and lazy-loading strategies for heavy GLTF/GLB models to prevent UI freezing.'
+                ]
+            },
+            'Green-Tech': {
+                role: 'Principal Eco-Tech & Sustainability Specialist',
+                directives: [
+                    'IMPACT VISUALIZATION: Integrate Chart.js/Recharts beautifully with dynamic data feeding and responsive resizing.',
+                    'PERFORMANCE: Write "Green Code"—highly optimized, minimal re-renders to save client device battery/processing power.',
+                    'ACCESSIBILITY: Ensure earthy, eco-friendly themes maintain high contrast ratios that comply with accessibility standards.'
+                ]
+            },
+            'Music': {
+                role: 'Principal Web-Audio & DSP Engineer',
+                directives: [
+                    'AUDIO ARCHITECTURE: Manage Tone.js or Web Audio API contexts safely across React/Vue component lifecycles (unmount/cleanup).',
+                    'PRECISION TIMING: Handle audio context resumes seamlessly on first user interaction to comply with browser autoplay policies.',
+                    'STATE: Serialize and save complex synth/patch parameter states into robust JSON schemas for local storage.'
+                ]
+            }
+        };
+
+        const config = masterCategoryConfigs[source.category] || {
+            role: 'Principal Full-Stack Architect & Lead UI/UX Engineer',
+            directives: [
+                'ARCHITECTURE: Use Clean Architecture or Feature-Sliced Design (FSD).',
+                'UX: Focus on "Keyboard-First" workflow and accessible UI.',
+                'QUALITY: Strict TypeScript, zero any types, comprehensive error handling.'
+            ]
+        };
+
+        const masterEngineMap = {
+            'Productivity': 'Next.js (App Router) + Tailwind CSS + Zustand',
+            'Game 2D': 'Vite + React + Phaser 3 + Tailwind CSS',
+            'Social': 'Next.js (App Router) + Tailwind CSS + Supabase (Architecture)',
+            'Fintech': 'Next.js (App Router) + Tailwind CSS + Zod + Dinero.js',
+            'Health': 'Next.js (App Router) + Tailwind CSS + Zustand',
+            'Education': 'Next.js (App Router) + Tailwind CSS + Zustand',
+            'E-commerce': 'Next.js (App Router) + Tailwind CSS + Zustand',
+            'Utility': 'Vite + React + Tailwind CSS + Web Workers + IndexedDB',
+            'Services': 'Next.js (App Router) + Tailwind CSS + Leaflet',
+            'Creative': 'Vite + React + Zustand + Canvas API/Fabric.js',
+            'Game 3D': 'Vite + React + React Three Fiber (R3F) / Babylon.js',
+            'Green-Tech': 'Next.js + Tailwind CSS + Recharts',
+            'Music': 'Vite + React + Tailwind CSS + Tone.js + Zustand'
+        };
+        const coreMasterEngine = masterEngineMap[source.category] || 'Next.js (App Router) + Tailwind CSS + Zustand';
+
         return `### SYSTEM ROLE & PRIME DIRECTIVE
-Act as a **Principal Full-Stack Architect, Lead UI/UX Engineer, and DevSecOps Specialist**. 
-Your goal is to build a production-ready, highly scalable, and flawless modern web application. You write clean, modular, heavily commented, and highly performant code.
+Act as a **${config.role}** and **DevSecOps Specialist**. 
+Your goal is to architect and build a production-ready, highly scalable, and flawless modern web application using **${coreMasterEngine}**. You write clean, modular, heavily commented, and highly performant code.
 
 ---
 
@@ -294,13 +428,13 @@ ${constraintsList}
 ---
 
 ### 2. STRICT ARCHITECTURAL & CODING STANDARDS
-1. **Framework & Language:** Use the most modern, stable version of the chosen framework (e.g., Next.js App Router, React + Vite, or Vue 3 Composition API). **TypeScript is MANDATORY.**
+1. **Tech Stack:** You MUST use **${coreMasterEngine}**. **TypeScript is MANDATORY.**
 2. **Type Safety:** Use strict TypeScript interfaces/types. Absolutely NO \`any\` types.
 3. **Architecture Pattern:** Follow Clean Architecture or Feature-Sliced Design (FSD). Strictly separate:
-   - *UI/View Layer* (Dumb components)
-   - *State Management* (Zustand, Redux, or Pinia)
-   - *Business Logic & Services* (API calls, data parsing)
-4. **Styling:** Use Tailwind CSS. Utilize arbitrary values or extend the theme to strictly implement the provided Color Palette. Include modern UI elements (Glassmorphism, Bento grids, or subtle drop-shadows) based on the app's aesthetic.
+   - *UI/View Layer* (Dumb components, highly reusable)
+   - *State Management* (Zustand/Context, separating UI state from Data state)
+   - *Business Logic & Services* (API wrappers, complex math/data parsing)
+4. **Styling:** Use Tailwind CSS. Utilize arbitrary values or extend the \`tailwind.config\` to strictly implement the provided Color Tokens. Include modern UI aesthetics (Bento grids, smooth transitions) based on the app's theme.
 5. **Zero-Tolerance Quality:** 
    - DO NOT leave placeholders like \`// write logic here\` or \`// to be implemented\`. Write the ACTUAL functional code.
    - Implement robust Error Boundaries and \`try/catch\` logic.
@@ -309,37 +443,45 @@ ${constraintsList}
 
 ---
 
-### 3. OUTPUT FORMATTING & BEHAVIOR (CRITICAL FOR GEMINI)
-- **ZERO YAPPING:** Do not write polite introductions, explanations, or conclusions. Output ONLY the code, CLI commands, and the phase completion question.
-- **FILE NAMING RULE:** Before EVERY code block, you MUST specify the exact file path inside a markdown comment or header (e.g., \`### File: src/components/ui/Button.tsx\`). 
+### 3. DOMAIN EXPERTISE & SPECIFIC DIRECTIVES (${source.category.toUpperCase()} FOCUS)
+${config.directives.map((d, i) => `${i + 1}. ${d}`).join('\n')}${
+categoryFocusMap && categoryFocusMap[source.category] ? `\n\n**PSYCHOLOGY & DOMAIN FOCUS:**\n${categoryFocusMap[source.category]}` : ''
+}${
+libStacks && libStacks[source.category] ? `\n\n**RECOMMENDED DOMAIN LIBRARIES:**\n${libStacks[source.category]}` : ''
+}
 
 ---
 
-### 4. INTERACTIVE GENERATION PROTOCOL (CRITICAL TO AVOID TOKEN LIMITS)
+### 4. OUTPUT FORMATTING & BEHAVIOR (CRITICAL FOR AI GENERATION)
+- **ZERO YAPPING:** Do not write polite introductions, explanations, or conclusions. Output ONLY the code, CLI commands, and the exact phase completion question at the end.
+- **FILE NAMING RULE:** Before EVERY code block, you MUST specify the exact file path inside a markdown header (e.g., \`### File: src/components/ui/Button.tsx\`). 
+
+---
+
+### 5. INTERACTIVE GENERATION PROTOCOL (CRITICAL TO AVOID TOKEN LIMITS)
 **PHASE 1: Project Scaffolding & Architecture**
-- Output the exact CLI commands to initialize the project (e.g., \`npx create-next-app...\`).
-- List the required dependencies (Tailwind, Lucide icons, State managers, etc.).
+- Output the exact CLI commands to initialize the project for ${coreMasterEngine}.
+- List the required NPM dependencies (Tailwind, Lucide icons, State managers, specific domain tools, etc.).
 - Output a precise ascii tree of the Folder Structure.
-- Provide the configuration files (\`tailwind.config.ts\`, \`tsconfig.json\`).
-- *STOP AND ASK: "Phase 1 Complete. Reply 'next' to generate the Global State & Utility/Service functions."*
+- Provide the configuration files (\`tailwind.config.ts\`, \`tsconfig.json\`, \`vite.config.ts\` / \`next.config.js\`).
+- *STOP AND ASK: "Phase 1 Complete. Reply 'next' to generate the Global State, Schema & Utility functions."*
 
-**PHASE 2: Core State Management & Services**
-- Write the global state stores (defining the JSON schema for the app).
-- Write the utility functions, mock API logic, or database schemas.
-- *STOP AND ASK: "Phase 2 Complete. Reply 'next' to generate the Base UI Components & Layouts."*
+**PHASE 2: Core State Management, Data Schema & Services**
+- Write the global state stores (defining the exact TypeScript interfaces and schema).
+- Write the utility functions, custom hooks, mock API logic, or Domain logic wrappers (e.g. Physics, Audio, Financial Math).
+- *STOP AND ASK: "Phase 2 Complete. Reply 'next' to generate the Master Layout & UI Components."*
 
-**PHASE 3: Reusable UI Components & Layout**
+**PHASE 3: Reusable UI Components & Master Layout**
 - Provide the Master Layout file (Navbars, Sidebars, Footer).
-- Provide highly reusable core components (Buttons, Cards, Modals).
-- *STOP AND ASK: "Phase 3 Complete. Reply 'next' to generate the Core Features & Pages."*
+- Provide highly reusable core UI components tailored to the domain (e.g., secure inputs for Fintech, specialized canvas wrappers for Games/Creative).
+- *STOP AND ASK: "Phase 3 Complete. Reply 'next' to generate the Core Features & Main Application Pages."*
 
 **PHASE 4: Core Mechanics Implementation**
-- Write the main application pages that integrate the State, Components, and the specific **Core Mechanics** requested above.
+- Write the main application pages that integrate the State, Components, and fully functionalize the specific **Core Mechanics** requested above.
 
 ---
 **UNDERSTOOD?** Begin by executing **PHASE 1** immediately. Do not write code for Phase 2 until I say "next".`;
     },
-
     randomizeGroup(slots, count, pool) {
         if (!pool || !pool.length) return;
         const used = new Set(slots.filter(s => s.locked).map(s => s.value));
