@@ -1,6 +1,6 @@
 export const conceptsList3 = [
-    'Glassmorphism (Frosted Glass)', 'Pixel Art', 'ASCII / Text Art', 'Hand-Drawn / Cartoon', 'Silhouette / Shadow Style', 'Neumorphism (Soft UI)', 'Cyberpunk Neon', 
-    'Windows 95 Retro', 'High-Contrast Brutalism', 'Minimalist Zen (Monochrome)', 
+    'Glassmorphism (Frosted Glass)', 'Low-Res Retro Console', 'Pixel Art', 'ASCII / Text Art', 'Hand-Drawn / Cartoon', 'Silhouette / Shadow Style', 'Neumorphism (Soft UI)', 'Cyberpunk Neon', 
+    'Windows 95 Retro', 'High-Contrast Brutalism', 'Neon / Cyberpunk', 'Minimalist Zen (Monochrome)', 
     'Bauhaus Modernist', 'Claymorphism (3D Soft)', 'Skeuomorphic Realistic', 
     'Synthwave / Vaporwave', 'Paper Material Design', 'Futuristic HUD / Interface', 
     'Bento Grid Dashboard', 'Spotify-style Duotone', 'Bold Typography Focused', 
