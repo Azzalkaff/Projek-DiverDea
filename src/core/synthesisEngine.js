@@ -242,6 +242,7 @@ Jangan hanya menggabungkan secara terpisah — **SINTESIS** ketiganya menjadi sa
 - **Settings:** berisi toggle untuk on/off audio, on/off darkmode & lightmode
 
 #### 5. ASSETS, ACCESSIBILITY & ROBUSTNESS
+- **data:** minimal 20 table data, untuk game minimal data assets game 10 dan levelnya 7
 - **Icons:** Lucide Icons (Mandatory).
 - **Images:** Unsplash API.
 - **Tone:** Playful with strategic Emojis.
