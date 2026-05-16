@@ -20,7 +20,7 @@ export const SynthesisEngine = {
             'Game 2D': {
                 role: 'Principal Game Architect & Creative Technologist',
                 directives: [
-                    'ASSETS: Buat bentuk objek menggunakan SVG persis dengan bentuk assets objek yang akan dibuat',
+                    'ASSETS: Buat bentuk objek menggunakan SVG inline untuk menciptakan bentuk assets objek yang akan dibuat',
                     'PHASER ARCHITECTURE: Pisahkan logika ke 3 Class Scene (BootScene, PlayScene, GameOverScene). Gunakan Phaser.Physics.Arcade. WAJIB pakai primitif (Phaser.Graphics), DILARANG meload gambar/Base64. Gunakan Phaser.Scale.FIT.',
                     'INPUT & COLLISION: Wajib gunakan `createCursorKeys()` untuk polling input di `update()` (bukan addEventListener). Gunakan `this.physics.add.collider()` untuk tabrakan, jangan tulis rumus fisika manual.',
                     'ENVIRONMENT DEPTH: Jangan biarkan background kosong/hitam mati. Buat elemen dinamis yang estetik dan sesuai dengan konsep aplikasi',
@@ -242,7 +242,7 @@ Jangan hanya menggabungkan secara terpisah — **SINTESIS** ketiganya menjadi sa
 - **Settings:** berisi toggle untuk on/off audio, on/off darkmode & lightmode
 
 #### 5. ASSETS, ACCESSIBILITY & ROBUSTNESS
-- **data:** minimal 20 table data, untuk game minimal data assets game 10 dan levelnya 7
+- **data:** minimal 20 table data untuk non game, untuk game minimal data assets svg chacacter ada 10; tingkat kesulitan ada hard-medium-low atau jumlah levelnya ada 7
 - **Icons:** Lucide Icons (Mandatory).
 - **Images:** Unsplash API.
 - **Tone:** Playful with strategic Emojis.
