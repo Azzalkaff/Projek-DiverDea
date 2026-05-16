@@ -254,8 +254,6 @@ Jangan hanya menggabungkan secara terpisah — **SINTESIS** ketiganya menjadi sa
 #### 6. CREATIVE CONSTRAINT
 Semua desain WAJIB mematuhi batasan berikut: **"${activeConstraint}"**. Batasan ini bukan opsional — ini adalah filter utama dalam setiap keputusan desain. Jelaskan bagaimana batasan ini mempengaruhi arsitektur dan UX di bagian Rationale.
 
-jika tidak ada isi di dalam "", tidak usah dipedulikan
-
 ---
 
 ### CATEGORY SPECIFIC FOCUS:
