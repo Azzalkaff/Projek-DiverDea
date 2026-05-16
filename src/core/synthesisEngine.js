@@ -230,7 +230,7 @@ Jangan hanya menggabungkan secara terpisah — **SINTESIS** ketiganya menjadi sa
 #### 3. DESIGN SYSTEM & MICRO-INTERACTIONS
 - **Grid:** Gunakan sistem grid 8pt/4pt untuk konsistensi layout.
 - **Palette:** Gunakan Hero: ${colors?.color1 || '#8FD903'}, Neutral: ${colors?.color2 || '#F4D3FF'}, Accent: ${colors?.color3 || '#24C574'}. (Harmonisasikan saturasi agar sesuai dengan gaya "${aesthetics}").
-- **Typography:** Gunakan hierarki tipografi yang jelas (Contrast & Readability).
+- **Typography:** Gunakan hierarki tipografi yang jelas (Contrast & Readability) dan sesuai dengan tema ${aesthetics}.
 - **Juice:** Tambahkan micro-animations (GSAP/CSS) pada setiap interaksi (hover, click, state change).
 
 #### 4. UX CLARITY & LOW COGNITIVE LOAD
@@ -238,6 +238,7 @@ Jangan hanya menggabungkan secara terpisah — **SINTESIS** ketiganya menjadi sa
 - **Information Architecture:** Gunakan progressive disclosure — jangan tampilkan semua fitur sekaligus. Tampilkan fitur utama terlebih dahulu, fitur lanjutan di-reveal bertahap.
 - **Visual Hierarchy:** Pastikan user langsung mengerti apa yang harus dilakukan pertama kali tanpa membaca instruksi panjang.
 - **Feedback Loop:** Setiap aksi user harus menghasilkan feedback visual/audio yang jelas dan instan.
+- **Settings:** berisi toggle untuk on/off audio, on/off darkmode & lightmode
 
 #### 5. ASSETS, ACCESSIBILITY & ROBUSTNESS
 - **Icons:** Lucide Icons (Mandatory).
@@ -250,6 +251,8 @@ Jangan hanya menggabungkan secara terpisah — **SINTESIS** ketiganya menjadi sa
 
 #### 6. CREATIVE CONSTRAINT
 Semua desain WAJIB mematuhi batasan berikut: **"${activeConstraint}"**. Batasan ini bukan opsional — ini adalah filter utama dalam setiap keputusan desain. Jelaskan bagaimana batasan ini mempengaruhi arsitektur dan UX di bagian Rationale.
+
+jika tidak ada isi di dalam "", tidak usah dipedulikan
 
 ---
 
