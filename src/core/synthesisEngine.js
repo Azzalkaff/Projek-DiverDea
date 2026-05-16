@@ -20,19 +20,20 @@ export const SynthesisEngine = {
             'Game 2D': {
                 role: 'Principal Game Architect & Creative Technologist',
                 directives: [
+                    'FUNGSI: Ubah Fungsi Global Menjadi ES6 Classes: Jangan gunakan fungsi biasa atau objek literal untuk mengatur scene. Gunakan class NamaScene extends Phaser.Scene. Ini penting untuk mengisolasi variabel agar tidak saling bertabrakan.',
                     'ASSETS: Buat bentuk objek menggunakan SVG inline untuk menciptakan bentuk assets objek yang akan dibuat',
-                    'PHASER ARCHITECTURE: Pisahkan logika ke 3 Class Scene (BootScene, PlayScene, GameOverScene). Gunakan Phaser.Physics.Arcade. WAJIB pakai primitif (Phaser.Graphics), DILARANG meload gambar/Base64. Gunakan Phaser.Scale.FIT.',
+                    'PHASER ARCHITECTURE: Pisahkan logika ke 3 Class Scene (BootScene, PlayScene, GameOverScene). Gunakan Phaser.Physics.Arcade. WAJIB pakai primitif (Phaser.Graphics), DILARANG meload gambar/Base64. Gunakan Phaser.Scale.FIT. Gambar bentuk primitif hanya sekali di BootScene, ubah menjadi tekstur menggunakan .generateTexture(), lalu gunakan sebagai sprite biasa di PlayScene',
                     'INPUT & COLLISION: Wajib gunakan `createCursorKeys()` untuk polling input di `update()` (bukan addEventListener). Gunakan `this.physics.add.collider()` untuk tabrakan, jangan tulis rumus fisika manual.',
                     'ENVIRONMENT DEPTH: Jangan biarkan background kosong/hitam mati. Buat elemen dinamis yang estetik dan sesuai dengan konsep aplikasi',
                     'PROGRESSION & DIFFICULTY: Terapkan kurva kesulitan dinamis (kecepatan/spawn rate musuh naik seiring waktu). Simpan "High Score" ke LocalStorage secara real-time agar persaingan terasa nyata.',
                     'DOPAMINE LOOP (HOOK): Jangan hanya cetak skor. Implementasikan sistem "Combo Multiplier" jika pemain bermain agresif tanpa gagal, dan jatuhkan "Power-Ups" secara acak (misal: perisai, tembakan ganda, pelambat waktu).',
                     'DESKTOP-FIRST CONTROLS: EKSKLUSIF untuk Desktop. Gunakan Keyboard (WASD/Arrows/Space) dan Mouse (Pointer/Klik). DILARANG menulis kontrol sentuh (mobile UI).',
-                    'PROCEDURAL AUDIO: Gunakan sintesis Web Audio API (OscillatorNode) untuk membuat efek suara yang ada digame, JANGAN meload file audio eksternal.'
+                    'PROCEDURAL AUDIO: Gunakan sintesis Web Audio API (OscillatorNode) untuk membuat efek suara yang ada digame, JANGAN meload file audio eksternal. AudioContext harus diinisialisasi atau di-resume tepat saat pemain menekan tombol "Start" di Menu'
                 ]
             },
             'Social': {
                 role: 'Principal Social Architecture & Growth Engineer',
-                directives: [
+                directives: [  
                     'INTERACTION ARCHITECTURE: Implement an Event-Driven system for all social actions (Likes, Follows, Posts). Ensure optimistic UI updates with immediate visual feedback.',
                     'ENGAGEMENT LOOPS: Use subtle physics-based animations (Animate.css/GSAP) for notifications. Implement "Social Proof" indicators (view counters, activity heatmaps).',
                     'CONTENT FEED: Design a high-performance infinite scroll with media-rich cards. Implement "Lazy Loading" for images and auto-play logic for previews.',
@@ -242,7 +243,7 @@ Jangan hanya menggabungkan secara terpisah — **SINTESIS** ketiganya menjadi sa
 - **Settings:** berisi toggle untuk on/off audio, on/off darkmode & lightmode
 
 #### 5. ASSETS, ACCESSIBILITY & ROBUSTNESS
-- **data:** minimal 20 table data untuk non game, untuk game minimal data assets svg chacacter ada 10; tingkat kesulitan ada hard-medium-low atau jumlah levelnya ada 7
+- **data:** minimal 20 table data jika aplikasi ini bukan game, untuk game minimal data assets svg chacacter ada 5 yang benar2 bagus; tingkat kesulitan ada hard-medium-low atau jumlah levelnya ada 7 —pilih salahsatu—.
 - **Icons:** Lucide Icons (Mandatory).
 - **Images:** Unsplash API.
 - **Tone:** Playful with strategic Emojis.
