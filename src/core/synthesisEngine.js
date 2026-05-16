@@ -206,6 +206,7 @@ Berperanlah sebagai **Principal Software Architect & Lead Product Designer** den
 ${mechanicsList}
 - **Design Aesthetic:** "${aesthetics}"
 - **Design Constraint:** ${activeConstraint}
+- **Language:** Bahasa Indonesia, untuk hal2 teknis tetap gunakan bahasa inggris
 
 ### TECHNICAL SPECIFICATION:
 - **Core Engine:** ${coreEngine}
