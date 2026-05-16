@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lateral Idea Synthesizer</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="h-screen w-screen overflow-hidden bg-cream text-matcha-dark dark:bg-matcha-dark dark:text-cream-dim transition-colors duration-500 font-sans select-none">
+
+    <div id="app" class="relative h-full w-full flex overflow-hidden" @click="initAudioContext">
+        <div class="orb bg-matcha/20 top-[-10%] left-[-10%]"></div>
+        <div class="orb bg-matcha/10 bottom-[-10%] right-[-10%]"></div>
+        
+        <!-- Theme Toggle -->
+        <div class="fixed top-6 right-10 z-[100] flex items-center gap-3 bg-cream/80 backdrop-blur-md p-1.5 pl-4 rounded-full border border-oatmeal shadow-sm">
+            <span class="text-[9px] font-black uppercase tracking-[0.2em] opacity-50">{{ isDarkMode ? 'Dark' : 'Light' }}</span>
+            <button @click="toggleAudio" class="flex items-center justify-center w-8 h-8 rounded-full bg-matcha/20 text-matcha hover:bg-matcha/40 transition-all">
+                <i class="fa-solid" :class="audioInitialized ? 'fa-volume-high' : 'fa-volume-xmark'"></i>
+            </button>
+            <button @click="toggleTheme" class="flex items-center justify-center w-8 h-8 rounded-full bg-matcha text-matcha-dark shadow-sm hover:scale-105 transition-transform">
+                <i class="fa-solid" :class="isDarkMode ? 'fa-sun' : 'fa-moon'"></i>
+            </button>
+        </div>
+
+        <!-- Sidebar Left: Controls -->
+        <aside class="w-[280px] h-full bg-cream-dark dark:bg-matcha-surface border-r border-oatmeal dark:border-white/5 flex flex-col z-20 transition-colors">
+            <div class="p-8 border-b border-oatmeal space-y-4">
+                <a href="index.html" class="text-lg font-bold tracking-tighter flex items-center gap-2 hover:opacity-70 transition-opacity">
+                    <span class="w-2 h-2 bg-matcha rounded-full animate-pulse"></span> diverdea.
+                </a>
+                <div class="relative">
+                    <input type="text" v-model="appName" placeholder="App Name..." 
+                           class="w-full bg-white/40 dark:bg-white/5 border border-oatmeal dark:border-white/10 px-4 py-2.5 rounded-xl text-xs font-black tracking-widest outline-none focus:ring-1 focus:ring-matcha transition-all uppercase">
+                    <i class="fa-solid fa-pen absolute right-4 top-1/2 -translate-y-1/2 text-[8px] opacity-30"></i>
+                </div>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-8 space-y-8">
+                <!-- Modes -->
+                <div class="space-y-4">
+                    <h4 class="text-[10px] font-bold uppercase tracking-widest opacity-40">Mode</h4>
+                    <div class="flex bg-oatmeal/30 dark:bg-white/5 p-1 rounded-lg border border-matcha/10">
+                        <button v-for="m in ['general', 'standard', 'lateral', 'manual']" :key="m" @click="synthesisMode = m; playPop()" 
+                                class="flex-1 text-[9px] font-bold uppercase tracking-widest py-2 rounded-md transition-all"
+                                :class="synthesisMode === m ? 'bg-matcha text-matcha-dark shadow-sm' : 'opacity-50'">{{ m }}</button>
+                    </div>
+                    <select v-model="selectedCategory" @change="generateLateralIdea" class="w-full px-3 py-2 text-sm bg-cream dark:bg-white/10 border border-matcha/20 rounded-lg font-bold outline-none appearance-none">
+                        <option v-for="cat in categories" :value="cat">{{ cat }}</option>
+                    </select>
+                </div>
+
+                <!-- Prompt Output -->
+                <div class="space-y-4">
+                    <h4 class="text-[10px] font-bold uppercase tracking-widest opacity-40">Target Output</h4>
+                    <div class="flex bg-oatmeal/30 dark:bg-white/5 p-1 rounded-lg border border-matcha/10">
+                        <button v-for="mode in [{id:'standard', label:'Single HTML'}, {id:'master', label:'Modern Stack'}]" :key="mode.id" 
+                                @click="promptMode = mode.id; playPop()" 
+                                class="flex-1 text-[9px] font-bold uppercase tracking-widest py-2 rounded-md transition-all"
+                                :class="promptMode === mode.id ? 'bg-matcha text-matcha-dark shadow-sm' : 'opacity-50'">{{ mode.label }}</button>
+                    </div>
+                </div>
+
+                <!-- Config -->
+                <div class="space-y-6">
+                    <h4 class="text-[10px] font-bold uppercase tracking-widest opacity-40">Composition</h4>
+                    <div v-for="cfg in [
+                        {label:'Mechanics', key:'mechanicCount'}, 
+                        {label:'Styles', key:'styleCount', toggle:'useThirdConcept'}, 
+                        {label:'Audiences', key:'audienceCount', toggle:'useAudience'}, 
+                        {label:'Constraints', key:'constraintCount', toggle:'useConstraint'}
+                    ]" v-show="!cfg.toggle || $data[cfg.toggle]" :key="cfg.key">
+                        <label class="text-[9px] uppercase tracking-widest opacity-40 font-bold mb-2 block">{{ cfg.label }}</label>
+                        <div class="flex bg-cream dark:bg-white/5 p-1 rounded-xl border border-matcha/20">
+                            <button v-for="n in [0,1,2,3,4,5]" :key="n" @click="setCount(cfg.key, n)" 
+                                    class="flex-1 py-1 text-[10px] font-bold rounded-lg transition-all"
+                                    :class="$data[cfg.key] === n ? 'bg-matcha text-matcha-dark shadow-sm' : 'opacity-30'">{{ n }}x</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Toggles -->
+                <div class="space-y-3 pt-4 border-t border-oatmeal">
+                    <div v-for="t in [{label:'UI Style', key:'useThirdConcept'}, {label:'Target Audience', key:'useAudience'}, {label:'Constraint', key:'useConstraint'}]" :key="t.key"
+                         class="flex items-center justify-between cursor-pointer" @click="toggleState(t.key)">
+                        <span class="text-[9px] opacity-70 font-bold uppercase tracking-widest">{{ t.label }}</span>
+                        <div class="relative w-8 h-4 bg-oatmeal rounded-full transition-colors" :class="{'bg-matcha': $data[t.key]}">
+                            <div class="absolute left-0.5 top-0.5 w-3 h-3 bg-white rounded-full transition-transform" :class="{'translate-x-4': $data[t.key]}"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Palette -->
+                <div class="space-y-4 pt-6 border-t border-oatmeal">
+                    <div class="flex justify-between items-center">
+                        <h4 class="text-[10px] font-bold uppercase tracking-widest opacity-40">Palette</h4>
+                        <div class="flex gap-2">
+                            <button @click="resetToSignature" class="text-[9px] font-bold text-matcha hover:opacity-100 opacity-60 transition-all">Signature</button>
+                            <button @click="randomizeColors" class="text-matcha hover:rotate-180 transition-transform"><i class="fa-solid fa-dice"></i></button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 p-2 bg-cream dark:bg-white/5 rounded-xl border border-oatmeal">
+                        <div v-for="c in ['color1', 'color2', 'color3']" :key="c" class="flex flex-col items-center gap-1">
+                            <input type="color" v-model="$data[c]" class="w-full h-6 cursor-pointer bg-transparent">
+                            <span class="text-[7px] uppercase opacity-40 font-bold">{{ c.replace('color', 'Slot ') }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vault -->
+                <button @click="openCrudManager" class="w-full py-3 border border-dashed border-matcha/40 hover:border-matcha bg-matcha/5 text-xs font-bold uppercase tracking-widest rounded-xl transition-all">
+                    <i class="fa-solid fa-database mr-2"></i> Manage Vault
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col relative z-10 overflow-hidden bg-cream dark:bg-matcha-dark">
+            <div class="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none">
+                <h2 class="text-[12vw] font-black tracking-tighter">DIVERDEA</h2>
+            </div>
+
+            <div class="flex-1 flex flex-col items-center justify-center p-12 relative overflow-y-auto">
+                <div v-if="generatedIdea" class="w-full max-w-3xl flex flex-col items-center gap-8 framework-container">
+                    
+                    <!-- Product Slider -->
+                    <div class="framework-item relative group flex items-center justify-center py-2 w-full" :class="{'ring-1 ring-matcha/20 rounded-lg': currentFocus.type === 'product'}">
+                        <button @click="updateSlot('product', 0, -1)" class="absolute left-0 opacity-0 group-hover:opacity-100 p-2 text-matcha"><i class="fa-solid fa-chevron-left"></i></button>
+                        <div class="flex items-center gap-3 cursor-pointer" @click="currentFocus = {type:'product', index:0}">
+                            <input v-if="synthesisMode === 'manual'" v-model="productSlot.value" 
+                                   placeholder="Concept / Product Name..."
+                                   class="text-xl md:text-2xl text-center bg-transparent border-b border-matcha/20 outline-none italic w-full text-matcha-dark dark:text-cream">
+                            <span v-else class="text-xl md:text-2xl text-matcha-dark/60 dark:text-cream-dim/50 italic" :class="{'opacity-40 line-through': productSlot.locked}">{{ productSlot.value }}</span>
+                            <button @click.stop="productSlot.locked = !productSlot.locked" class="text-xs" :class="productSlot.locked ? 'text-red-400' : 'text-matcha opacity-0 group-hover:opacity-100'">
+                                <i class="fa-solid" :class="productSlot.locked ? 'fa-lock' : 'fa-lock-open'"></i>
+                            </button>
+                        </div>
+                        <button @click="updateSlot('product', 0, 1)" class="absolute right-0 opacity-0 group-hover:opacity-100 p-2 text-matcha"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+
+                    <span class="w-12 h-0.5 bg-matcha/20"></span>
+
+                    <!-- Mechanic Sliders -->
+                    <div v-for="(slot, i) in mechanicSlots.slice(0, mechanicCount)" :key="'m'+i" 
+                         class="framework-item relative group flex items-center justify-center w-full"
+                         :class="[i === 0 ? 'py-4' : 'mt-1', currentFocus.type === 'mechanic' && currentFocus.index === i ? 'ring-1 ring-matcha/20 rounded-lg' : '']">
+                        <button @click="updateSlot('mechanic', i, -1)" class="absolute left-0 opacity-0 group-hover:opacity-100 p-2 text-matcha"><i class="fa-solid fa-chevron-left"></i></button>
+                        <div class="flex items-center gap-4 cursor-pointer" @click="currentFocus = {type:'mechanic', index:i}">
+                            <input v-if="synthesisMode === 'manual'" v-model="slot.value"
+                                   :placeholder="i === 0 ? 'Core Mechanic / Feature...' : 'Add Mechanic...'"
+                                   class="bg-transparent border-b border-matcha/20 outline-none text-center font-black tracking-tight leading-tight w-full"
+                                   :class="[i === 0 ? 'text-4xl md:text-6xl text-matcha-dark dark:text-cream' : 'text-xl opacity-60 text-matcha-dark dark:text-cream']">
+                            <span v-else class="text-matcha-dark dark:text-cream font-black tracking-tight leading-tight text-center" 
+                                  :class="[i === 0 ? 'text-4xl md:text-6xl' : 'text-xl opacity-60', slot.locked ? 'text-red-400/80' : '']">{{ slot.value }}</span>
+                            <button @click.stop="slot.locked = !slot.locked" class="text-xs" :class="slot.locked ? 'text-red-400' : 'text-matcha opacity-0 group-hover:opacity-100'">
+                                <i class="fa-solid" :class="slot.locked ? 'fa-lock' : 'fa-lock-open'"></i>
+                            </button>
+                        </div>
+                        <button @click="updateSlot('mechanic', i, 1)" class="absolute right-0 opacity-0 group-hover:opacity-100 p-2 text-matcha"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+
+                    <!-- Meta Sliders -->
+                    <div v-for="group in [
+                        {type:'style', state:styleSlots, count:styleCount, active:useThirdConcept, color:'matcha'}, 
+                        {type:'audience', state:audienceSlots, count:audienceCount, active:useAudience, color:'amber'}, 
+                        {type:'constraint', state:constraintSlots, count:constraintCount, active:useConstraint, color:'violet'}
+                    ]" :key="group.type" v-show="group.active" class="w-full space-y-2 mt-4">
+                        <div v-for="(slot, i) in group.state.slice(0, group.count)" :key="group.type+i"
+                             class="framework-item relative group flex items-center justify-center w-full py-1"
+                             :class="{'ring-1 ring-matcha/10 rounded-lg': currentFocus.type === group.type && currentFocus.index === i}">
+                            <button @click="updateSlot(group.type, i, -1)" class="absolute left-0 opacity-0 group-hover:opacity-100 p-1 text-matcha"><i class="fa-solid fa-chevron-left text-[10px]"></i></button>
+                            <div class="flex items-center gap-2 px-4 py-1.5 rounded-full border shadow-sm transition-all" 
+                                 :class="[`bg-${group.color}-400/10 border-${group.color}-400/20`, slot.locked ? 'border-red-400/40' : '']"
+                                 @click="currentFocus = {type:group.type, index:i}">
+                                <input v-if="synthesisMode === 'manual'" v-model="slot.value"
+                                       :placeholder="group.type + '...'"
+                                       class="bg-transparent outline-none text-[11px] font-bold uppercase tracking-wider text-center w-24">
+                                <span v-else class="text-[11px] font-bold uppercase tracking-wider">{{ i === 0 ? group.type + ':' : '+' }} {{ slot.value }}</span>
+                                <button @click.stop="slot.locked = !slot.locked" class="text-[10px]" :class="slot.locked ? 'text-red-400' : 'opacity-40'">
+                                    <i class="fa-solid" :class="slot.locked ? 'fa-lock' : 'fa-lock-open'"></i>
+                                </button>
+                            </div>
+                            <button @click="updateSlot(group.type, i, 1)" class="absolute right-0 opacity-0 group-hover:opacity-100 p-1 text-matcha"><i class="fa-solid fa-chevron-right text-[10px]"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex flex-col items-center gap-6 mt-12">
+                        <button @click="generateLateralIdea" class="px-12 py-4 bg-matcha hover:bg-matcha/90 text-matcha-dark rounded-full font-black shadow-xl transition-all hover:-translate-y-1">
+                            Synthesize Idea
+                        </button>
+                        <div class="flex gap-8">
+                            <button @click="saveCurrentIdea" class="text-[10px] font-bold uppercase tracking-widest opacity-40 hover:opacity-100 hover:text-matcha"><i class="fa-solid fa-bookmark mr-2"></i> Save</button>
+                            <button @click="generateAiPrompt()" class="text-[10px] font-bold uppercase tracking-widest opacity-40 hover:opacity-100 hover:text-matcha"><i class="fa-solid fa-robot mr-2"></i> Prompt</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fallback UI -->
+                <div v-else class="flex flex-col items-center opacity-30 animate-pulse">
+                    <i class="fa-solid fa-power-off text-6xl mb-6"></i>
+                    <p class="font-mono tracking-widest uppercase">System Standby</p>
+                    <button @click="generateLateralIdea" class="mt-8 px-6 py-2 border border-matcha rounded-full text-xs font-bold uppercase tracking-widest hover:bg-matcha hover:text-matcha-dark transition-all">Initialize Engine</button>
+                </div>
+            </div>
+
+            <!-- Prompt Overlay -->
+            <transition name="slide-up">
+                <div v-if="generatedPrompt" class="absolute bottom-0 w-full bg-matcha-dark/95 backdrop-blur-xl border-t border-matcha/20 p-8 z-50 h-[45vh] flex flex-col shadow-2xl">
+                    <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-4">
+                        <div class="flex items-center gap-4">
+                            <div class="flex gap-2">
+                                <div class="w-3 h-3 rounded-full bg-red-400 cursor-pointer" @click="generatedPrompt = ''"></div>
+                                <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
+                                <div class="w-3 h-3 rounded-full bg-green-400"></div>
+                            </div>
+                            <span class="text-matcha font-mono text-[10px] uppercase tracking-widest font-bold">AI.Prototype.Compiler</span>
+                        </div>
+                        <button @click="copyToClipboard($event)" class="px-4 py-2 bg-matcha text-matcha-dark text-[10px] font-black uppercase rounded-lg">Copy Code</button>
+                    </div>
+                    <div class="overflow-y-auto flex-1 font-mono text-[11px] text-matcha/80 whitespace-pre-wrap leading-relaxed">{{ generatedPrompt }}</div>
+                </div>
+            </transition>
+        </main>
+
+        <!-- Sidebar Right: Library -->
+        <aside class="w-[260px] h-full bg-cream-dark dark:bg-matcha-surface border-l border-oatmeal flex flex-col z-20 transition-colors">
+            <div class="p-8 border-b border-oatmeal flex justify-between items-center">
+                <h3 class="text-[10px] font-bold opacity-40 uppercase tracking-widest">Library</h3>
+                <span class="text-[10px] font-mono opacity-40">{{ savedIdeas.length }}</span>
+            </div>
+            <div class="flex-1 overflow-y-auto p-6 space-y-4">
+                <div v-for="idea in savedIdeas" :key="idea.id" class="bg-cream p-5 rounded-xl border border-oatmeal hover:border-matcha transition-all group relative">
+                    <div class="space-y-2 mb-4">
+                        <p class="text-[8px] font-bold text-matcha uppercase tracking-widest">{{ idea.appName }}</p>
+                        <p class="text-sm font-bold leading-tight">{{ idea.product }}</p>
+                        <p class="text-[10px] opacity-60">+ {{ idea.mechanics && idea.mechanics.length ? idea.mechanics[0] : 'Concept' }}</p>
+                    </div>
+                    <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button @click="generateAiPrompt(idea)" class="flex-1 py-1.5 text-[9px] font-bold bg-matcha/20 rounded-md">Generate</button>
+                        <button @click="deleteIdea(idea.id)" class="px-2 py-1.5 text-red-500 bg-red-50 rounded-md"><i class="fa-solid fa-trash text-[9px]"></i></button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- CRUD Modal -->
+        <transition name="slide-up">
+            <div v-if="showCrudModal" class="fixed inset-0 bg-matcha-dark/60 backdrop-blur-lg z-[150] flex items-center justify-center p-8">
+                <div class="bg-cream dark:bg-matcha-surface w-full max-w-6xl h-[85vh] rounded-3xl border border-oatmeal flex flex-col shadow-2xl relative">
+                    <div class="p-8 border-b border-oatmeal flex justify-between items-center">
+                        <div>
+                            <h2 class="text-xl font-bold">Concept Vault</h2>
+                            <p class="text-[9px] uppercase opacity-40 mt-1 tracking-widest">Manage your manual assets and custom entries</p>
+                        </div>
+                        <div class="flex gap-4">
+                            <select v-model="modalCategory" class="px-3 py-2 text-xs bg-cream border border-matcha/20 rounded-lg font-bold outline-none">
+                                <option v-for="cat in categories" :value="cat">{{ cat }}</option>
+                            </select>
+                            <button @click="showCrudModal = false" class="w-10 h-10 rounded-full bg-oatmeal/20 flex items-center justify-center text-matcha-dark dark:text-cream"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 overflow-hidden grid grid-cols-1 md:grid-cols-3 gap-8 p-8 h-full">
+                        <div v-for="col in [
+                            {label: 'Mechanics', list: synthesisMode === 'general' ? 'generalMechanics' : (synthesisMode === 'lateral' ? 'conceptsListLateral' : 'conceptsList1')},
+                            {label: 'Products', list: synthesisMode === 'general' ? 'generalProducts' : 'conceptsList2'},
+                            {label: 'Styles', list: 'conceptsList3'}
+                        ]" :key="col.label" class="flex flex-col bg-oatmeal/10 rounded-2xl p-6 h-full overflow-hidden">
+                            <h3 class="text-[10px] font-bold uppercase tracking-widest mb-4 text-matcha">{{ col.label }}</h3>
+                            <input @keyup.enter="addCrudItemDirect(col.list, $event)" type="text" placeholder="+ Add..." class="w-full px-3 py-2 text-xs bg-cream border border-matcha/20 rounded-lg mb-4 outline-none">
+                            <div class="flex-1 overflow-y-auto space-y-2 pr-2">
+                                <div v-for="(item, idx) in getData(col.list)" :key="idx" 
+                                     class="p-3 rounded-lg text-xs bg-cream border border-oatmeal/60 flex items-center justify-between group">
+                                    <div class="flex-1 truncate mr-2">
+                                        <input v-if="editingSlot && editingSlot.list === col.list && editingSlot.index === idx" 
+                                               v-model="editingValue" @keyup.enter="saveCrudEdit" @keyup.esc="editingSlot = null"
+                                               class="w-full bg-transparent border-b border-matcha outline-none">
+                                        <span v-else class="opacity-70">{{ item }}</span>
+                                    </div>
+                                    <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button v-if="editingSlot && editingSlot.list === col.list && editingSlot.index === idx" @click="saveCrudEdit" class="text-green-500"><i class="fa-solid fa-check text-[10px]"></i></button>
+                                        <button v-else @click="startCrudEdit(col.list, idx)" class="text-matcha"><i class="fa-solid fa-pen text-[10px]"></i></button>
+                                        <button @click="deleteCrudItem(col.list, idx)" class="text-red-400"><i class="fa-solid fa-trash text-[10px]"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </transition>
+
+        <!-- Debug Overlay (Point 6: Trace & Bottleneck UI) -->
+        <div v-if="isDebugMode" class="fixed top-20 right-6 w-80 max-h-[70vh] bg-matcha-dark/95 backdrop-blur-xl border border-matcha/30 rounded-2xl z-[200] flex flex-col shadow-2xl overflow-hidden font-mono">
+            <div class="p-4 border-b border-white/10 flex justify-between items-center bg-matcha/10">
+                <span class="text-[10px] font-bold text-matcha uppercase tracking-widest">Debug Monitor</span>
+                <div class="flex gap-2">
+                    <button @click="clearLogs" class="text-[8px] bg-red-500/20 text-red-400 px-2 py-1 rounded">Clear</button>
+                    <button @click="isDebugMode = false" class="text-white/40 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+            </div>
+            
+            <div class="p-4 space-y-4 overflow-y-auto">
+                <!-- Stats -->
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="bg-white/5 p-2 rounded-lg border border-white/5 text-center">
+                        <p class="text-[8px] opacity-40 uppercase">Synthesis</p>
+                        <p class="text-xs font-bold text-matcha">{{ lastPerf }}ms</p>
+                    </div>
+                    <div class="bg-white/5 p-2 rounded-lg border border-white/5 text-center">
+                        <p class="text-[8px] opacity-40 uppercase">Errors</p>
+                        <p class="text-xs font-bold" :class="errorLog.length ? 'text-red-400' : 'text-green-400'">{{ errorLog.length }}</p>
+                    </div>
+                </div>
+
+                <!-- Trace Log -->
+                <div class="space-y-1">
+                    <p class="text-[8px] opacity-40 uppercase mb-2">Live Trace</p>
+                    <div v-for="(log, idx) in traceLog" :key="idx" class="text-[9px] border-l-2 pl-2 py-1 leading-tight" 
+                         :class="log.type === 'error' ? 'border-red-500 text-red-300' : 'border-matcha text-matcha/70'">
+                        <span class="opacity-40">[{{ log.time }}]</span> {{ log.msg }}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-4 bg-white/5 border-t border-white/10">
+                <button @click="checkDataHealth" class="w-full py-2 bg-matcha/20 hover:bg-matcha/30 text-matcha text-[9px] font-bold uppercase rounded-lg transition-all">Run Health Check</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="module" src="src/main.js"></script>
+</body>
+</html>
