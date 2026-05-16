@@ -179,90 +179,91 @@ export const SynthesisEngine = {
         };
         const coreEngine = engineMap[source.category] || 'Vue.js 3 (Composition API) & Tailwind CSS';
         
+        const mechanicsCount = (source.mechanics || []).length;
+        const mechanicsList = (source.mechanics || []).map((m, i) => `  ${i + 1}. "${m}"`).join('\n');
+        const aesthetics = (source.styles || []).join(', ') || 'Modern Minimalist';
+        const activeConstraint = (source.constraints && source.constraints.length > 0) 
+            ? source.constraints.join(', ') 
+            : "Must be highly functional, clean, and accessible";
+        
+        // Memformat Category Directives agar terlihat lebih rapi seperti di contoh (Bold di awal kata)
+        const formattedCategoryDirectives = config.directives.map(d => {
+            const splitIndex = d.indexOf(':');
+            if (splitIndex !== -1) {
+                return `- **${d.substring(0, splitIndex)}:**${d.substring(splitIndex + 1)}`;
+            }
+            return `- ${d}`;
+        }).join('\n');
+
         return `### SYSTEM ROLE:
-Berperanlah sebagai **Principal Software Architect & Lead Product Designer** dengan spesialisasi kategori [${source.category.toUpperCase()}]. Tugasmu adalah menciptakan prototype yang melampaui standar MVP biasa — fokus pada "State-of-the-Art" implementation.
+Berperanlah sebagai **Principal Software Architect & Lead Product Designer** dengan spesialisasi kategori [${source.category.toUpperCase()}]. Tugasmu adalah menciptakan prototype yang melampaui standar MVP biasa.
 
 ### PROJECT IDENTITY:
 - **Project Name:** "${source.appName}"
 - **Domain Focus:** ${source.category}
 - **Product Concept:** "${source.product}"
 - **Core Mechanics (Multi-Feature Synthesis):**
-  ${(source.mechanics || []).map((m, i) => `${i + 1}. "${m}"`).join('\n  ')}
-- **Design Aesthetic:** "${(source.styles || []).join(', ') || 'Modern Premium Minimalist'}"
-- **Target Audience:** ${(source.audiences || []).join(', ') || 'High-end General Users'}
+${mechanicsList}
+- **Design Aesthetic:** "${aesthetics}"
+- **Design Constraint:** ${activeConstraint}
+
 ### TECHNICAL SPECIFICATION:
 - **Core Engine:** ${coreEngine}
-- **Extended Libraries:** ${libStacks[source.category] || 'GSAP (Animations), Lucide (Icons)'}
-- **Environment:** Single File HTML Prototype (Zero Build Step). WAJIB gunakan tautan CDN yang valid (misal: unpkg, jsdelivr, script cdn.tailwindcss.com) di dalam tag <head> atau <body> agar kode langsung jalan di browser tanpa instalasi NPM.
-- **Architecture Pattern:** Reactive Component-Based Architecture with Clean SoC (Separation of Concerns).
-- **Code Output Restriction:** Tulis KESELURUHAN kode hanya di dalam SATU blok markdown \`\`\`html saja. JANGAN memecah menjadi beberapa blok file.
+- **Extended Libraries:** ${libStacks[source.category] || 'GSAP, Lucide Icons'}
+- **Environment:** Single File HTML Prototype (Zero Build Step).
 
 ---
 
 ### EXECUTIVE DIRECTIVES:
 
 #### 1. THE MULTI-FEATURE SYNTHESIS (STRATEGY)
-Analisis secara mendalam bagaimana **${(source.mechanics || []).length} mekanik** berikut berinteraksi:
-  ${(source.mechanics || []).map((m, i) => `${i + 1}. "${m}"`).join('\n  ')}
-**SINTESIS KRITIS:** Jangan hanya menggabungkan secara terpisah — buatlah "Synergy Hook". Setiap mekanik harus memiliki dampak langsung pada data atau perilaku mekanik lainnya (Cross-Feature Dependency). Jelaskan rasionalitas strategis di bagian "Rationale".
+Analisis secara mendalam bagaimana **${mechanicsCount} mekanik** berikut berinteraksi dan saling memperkuat di dalam "${source.product}":
+${mechanicsList}
+Jangan hanya menggabungkan secara terpisah — **SINTESIS** ketiganya menjadi satu pengalaman yang kohesif dan saling terkait. Setiap mekanik harus terasa seperti bagian integral dari produk, bukan fitur tambahan. Jelaskan rasionalitas strategis di bagian "Rationale".
 
-#### 2. ARCHITECTURE, STATE SCHEMA & LOGIC
-- **Clean Architecture:** Pisahkan Logic (State/Actions) dari View (HTML/CSS).
-- **Reactive State Schema:** Definisikan skema state global yang komprehensif (seperti Vue/React store).
-- **Deep Logic Implementation:** Pastikan logika mekanik inti memiliki algoritma yang nyata (bukan sekadar manipulasi UI). Jika ada "Procedural Generation", gunakan seeding atau noise logic yang valid.
+#### 2. ARCHITECTURE & STATE MANAGEMENT
+- Gunakan pola arsitektur yang bersih (Clean Architecture).
+- Implementasikan **Reactive State Management** yang robust.
+- Pastikan logika setiap mekanik bersifat **Deep Logic** (bukan simulasi visual semata).
+- Ketiga mekanik harus memiliki **state yang saling terhubung** — perubahan di satu fitur harus berdampak pada fitur lainnya.
 
-${['Game 2D', 'Game 3D'].includes(source.category) ? `#### 3. CANVAS/WEBGL INTEGRATION & OVERLAY UI
-- **Canvas First:** Fokus utama adalah rendering di \`<canvas>\`. Gunakan elemen DOM/HTML HANYA untuk overlay UI (seperti Main Menu, HUD, Settings, Game Over).
-- **Diegetic UI/Tutorial:** Hindari tooltip HTML biasa. Berikan instruksi langsung di dalam dunia game (misal: teks di lantai atau animasi tombol berkedip).
-- **Global Settings Overlay:** WAJIB sediakan menu Settings overlay (icon gear) untuk mengatur Sound/Audio Toggle, Fullscreen, dan Reset State.
+#### 3. DESIGN SYSTEM & MICRO-INTERACTIONS
+- **Grid:** Gunakan sistem grid 8pt/4pt untuk konsistensi layout.
+- **Palette:** Gunakan Hero: ${colors?.color1 || '#8FD903'}, Neutral: ${colors?.color2 || '#F4D3FF'}, Accent: ${colors?.color3 || '#24C574'}. (Harmonisasikan saturasi agar sesuai dengan gaya "${aesthetics}").
+- **Typography:** Gunakan hierarki tipografi yang jelas (Contrast & Readability).
+- **Juice:** Tambahkan micro-animations (GSAP/CSS) pada setiap interaksi (hover, click, state change).
 
-#### 4. ASSETS & ROBUSTNESS (ZERO TOLERANCE)
-- **ZERO TOLERANCE CODE:** Code WAJIB no bug, no error, dan no bottleneck. Performa WAJIB stabil 60 FPS tanpa *memory leak* atau *garbage collection spikes*.
-- **Asset Generation:** DILARANG menggunakan banyak external URL untuk sprite/texture. Sebisa mungkin hasilkan visual secara prosedural (menggunakan Canvas drawing API, primitive shapes, atau shader) agar file tetap murni mandiri.
-- **Data Persistence:** Simpan High Score, Save State, atau preferensi ke **LocalStorage** secara real-time.
-- **Bahasa:** Gunakan **Bahasa Indonesia** untuk seluruh teks UI, instruksi, dan menu overlay.` : `#### 3. COLOR SYSTEM & DESIGN TOKENS
-- **Hero Color:** ${colors?.color1 || '#3B82F6'} (Gunakan sebagai Brand/Primary Action).
-- **Neutral Color:** ${colors?.color2 || '#F3F4F6'} (Gunakan untuk Background/Surface).
-- **Accent Color:** ${colors?.color3 || '#10B981'} (Gunakan untuk Highlights/Badges/Interactive feedback).
-- **60-30-10 Rule:** Terapkan proporsi warna ini secara ketat untuk mencapai harmoni visual yang premium.
-- **Design Tokens:** Gunakan variabel CSS untuk spacing (scale: 4, 8, 16, 24, 32, 48, 64px) dan font-sizes.
+#### 4. UX CLARITY & LOW COGNITIVE LOAD
+- **WAJIB:** Sertakan section "How It Works" atau onboarding tooltip yang menjelaskan cara kerja aplikasi kepada user baru dalam 3-5 langkah sederhana.
+- **Information Architecture:** Gunakan progressive disclosure — jangan tampilkan semua fitur sekaligus. Tampilkan fitur utama terlebih dahulu, fitur lanjutan di-reveal bertahap.
+- **Visual Hierarchy:** Pastikan user langsung mengerti apa yang harus dilakukan pertama kali tanpa membaca instruksi panjang.
+- **Feedback Loop:** Setiap aksi user harus menghasilkan feedback visual/audio yang jelas dan instan.
 
-#### 4. UX CLARITY, ONBOARDING & FEEDBACK
-- **Self-Explanatory UX:** Desain WAJIB minimalis, low cognitive load, dan self-explanatory. User harus langsung paham tanpa harus banyak berpikir.
-- **Onboarding (How It Works):** Sediakan panduan visual atau teks (max 4 langkah) yang muncul saat pertama kali aplikasi di-load.
-- **Global Settings Menu:** WAJIB sediakan menu Settings/Pengaturan (misal: icon gear) yang berfungsi untuk mengatur Dark/Light Mode, Sound/Audio Toggle, dan Clear Data (Reset).
-- **Progressive Disclosure:** Sembunyikan kompleksitas. Tampilkan fitur lanjutan hanya saat user membutuhkannya (Contextual UI).
-- **Micro-interactions (Juice):** Setiap interaksi (hover, focus, active, success, error) WAJIB memiliki animasi GSAP yang halus (0.3s - 0.5s duration).
+#### 5. ASSETS, ACCESSIBILITY & ROBUSTNESS
+- **Icons:** Lucide Icons (Mandatory).
+- **Images:** Unsplash API.
+- **Tone:** Playful with strategic Emojis.
+- **A11y:** Pastikan elemen interaktif memiliki ARIA labels dan state yang jelas.
+- **Error Handling:** Implementasikan penanganan error yang elegan (try-catch, fallback UI).
+- **Loading States:** Sediakan skeleton screen atau spinner saat simulasi proses data.
+- **Persistence:** Sinkronisasi data secara otomatis ke **LocalStorage**.
 
-#### 5. ASSETS, ACCESSIBILITY & ROBUSTNESS (ZERO TOLERANCE)
-- **ZERO TOLERANCE CODE:** Code WAJIB no bug, no error, dan no bottleneck. Performa harus sangat dioptimalkan tanpa ada memory leak atau lag.
-- **Icons:** Lucide Icons (Gunakan secara konsisten).
-- **Images:** Gunakan direct link dari penyedia dummy image gratis (seperti https://picsum.photos atau https://placehold.co) yang tidak memerlukan API key agar gambar langsung dirender. DILARANG menggunakan Unsplash API karena membutuhkan otentikasi (Bearer Token) yang akan membuat gambar gagal dimuat.
-- **A11y (Accessibility):** Gunakan semantik HTML5, ARIA roles, dan pastikan rasio kontras warna memadai.
-- **Error Handling:** Implementasikan "Graceful Failure" dengan fallback UI yang tetap estetik.
-- **Data Persistence:** Simpan state aplikasi ke **LocalStorage** secara real-time agar user tidak kehilangan progres.
-
-#### 6. VOICE, TONE & MICRO-COPY
-- **BAHASA (MANDATORY):** Gunakan **Bahasa Indonesia** yang profesional, inspiratif, dan user-friendly untuk seluruh elemen UI, teks onboarding, tombol, dan micro-copy.
-- Tentukan personality aplikasi berdasarkan kategori [${source.category}]. Hindari bahasa teknis yang membosankan.`}
+#### 6. CREATIVE CONSTRAINT
+Semua desain WAJIB mematuhi batasan berikut: **"${activeConstraint}"**. Batasan ini bukan opsional — ini adalah filter utama dalam setiap keputusan desain. Jelaskan bagaimana batasan ini mempengaruhi arsitektur dan UX di bagian Rationale.
 
 ---
 
 ### CATEGORY SPECIFIC FOCUS:
-${config.directives.map((d, i) => `${i + 1}. ${d}`).join('\n')}
-
-**DOMAIN EXPERTISE & PSYCHOLOGY:**
-${categoryFocusMap[source.category] || ''}
+${formattedCategoryDirectives}
 
 ---
 
 ### RESPONSE FORMAT (MANDATORY):
-PENTING: Karena batasan token, PRIORITASKAN penulisan KODE LENGKAP di atas segalanya. DILARANG KERAS menyingkat kode dengan komentar (seperti "// sisa kode di sini" atau "// logic dilanjutkan nanti").
-
-1. **The Prototype (Full Code):** (TULISKAN INI PERTAMA KALI). WAJIB dalam bentuk Single File HTML utuh di dalam SATU blok markdown \`\`\`html. (Integrasikan semua HTML, CSS, dan JS). Pastikan UI memiliki "WOW factor" pada render pertama.
-2. **Executive Rationale:** Penjelasan singkat (maksimal 2 paragraf) tentang sinergi antar mekanik (Synergy Hook) dan mengapa ini menjadi "Game Changer".
-3. **Architecture & State Schema:** Rangkuman singkat skema JSON dari state utama aplikasi.
-4. **Roadmap & Testing:** Poin-poin singkat (bullet points) untuk fase pengembangan berikutnya dan strategi testing mekanik inti.`;
+1. **Rationale:** Mengapa kombinasi ${mechanicsCount} mekanik ini adalah "Game Changer"? Bagaimana mereka berinteraksi?
+2. **Feature Map:** Diagram singkat (teks) yang menunjukkan hubungan antar ${mechanicsCount} mekanik dalam produk.
+3. **Technical Architecture:** Penjelasan pola state dan implementasi mekanik inti.
+4. **The Prototype (Full Code):** Satu blok kode HTML utuh (CSS & JS di dalamnya).
+5. **Production Roadmap:** Strategi skalabilitas, optimasi performa, dan integrasi backend.`;
     },
 
     generateMasterPrompt(source, libStacks, categoryFocusMap, colors) {
